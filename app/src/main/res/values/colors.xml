@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <!-- TMDB Colors -->
+    <color name="tmdb_primary">#01d277</color>
+    <color name="tmdb_accent">#ffc107</color>
+
+    <!-- Custom Colors -->
+    <color name="custom_primary">@color/tmdb_primary</color>
+    <color name="custom_accent">@color/tmdb_accent</color>
+
+    <!-- Additional Colors -->
+    <color name="custom_text_primary">#000000</color> <!-- Black for primary text -->
+    <color name="custom_text_secondary">#666666</color> <!-- Dark Gray for secondary text -->
+    <color name="custom_background">#ffffff</color> <!-- White background -->
+</resources>

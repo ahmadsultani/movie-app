@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/custom_primary</item>
+        <item name="colorPrimaryDark">@color/custom_primary</item>
+        <item name="colorAccent">@color/custom_accent</item>
+        <item name="android:textColorPrimary">@color/custom_text_primary</item>
+        <item name="android:textColorSecondary">@color/custom_text_secondary</item>
+        <item name="android:windowBackground">@color/custom_background</item>
+    </style>
+    />
+</resources>
