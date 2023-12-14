@@ -44,8 +44,8 @@ class MovieViewModel(
         }
     }
 
-    fun refreshMovies() {
-        getAllMovie(1)
+    fun refreshMovies(genres: String = "") {
+        getAllMovie(1, genres)
     }
 
     init {

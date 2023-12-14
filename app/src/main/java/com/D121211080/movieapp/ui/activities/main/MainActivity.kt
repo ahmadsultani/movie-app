@@ -1,6 +1,5 @@
 package com.D121211080.movieapp.ui.activities.main
 
-import GenreUiState
 import GenreViewModel
 import android.content.Intent
 import android.os.Bundle
@@ -8,15 +7,35 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +54,8 @@ import com.D121211080.movieapp.R
 import com.D121211080.movieapp.data.model.Genre
 import com.D121211080.movieapp.data.model.Movie
 import com.D121211080.movieapp.ui.activities.detail.DetailActivity
-import com.D121211080.movieapp.ui.theme.MovieAppTheme
 import com.D121211080.movieapp.ui.component.CoilImage
+import com.D121211080.movieapp.ui.theme.MovieAppTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -58,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     Column {
                         CenterAlignedTopAppBar(title = {
                             Text(
-                                text = "Popular",
+                                text = "Movie List",
                                 fontWeight = FontWeight.SemiBold,
                                 style = MaterialTheme.typography.headlineLarge,
                             )
@@ -91,9 +110,8 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        MovieListContent(mainViewModel.mainUiState, {
-                            mainViewModel.refreshMovies()
-                            selectedGenre = null
+                        MainScreen(mainViewModel.mainUiState, {
+                            mainViewModel.refreshMovies(if (selectedGenre !== null) "${selectedGenre!!.id}" else "")
                         })
 
                     }
@@ -105,88 +123,17 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun GenreChips(
-        genreUiState: GenreUiState, selectedGenre: Genre?, onGenreSelected: (Genre) -> Unit
-    ) {
-
-        when (genreUiState) {
-            is GenreUiState.Success -> {
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(genreUiState.genres) { genre ->
-                        GenreChip(genre,
-                            selected = genre == selectedGenre,
-                            onGenreSelected = { onGenreSelected(it) })
-                    }
-                }
-            }
-
-            is GenreUiState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Error loading genres",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-
-            is GenreUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            else -> {}
-        }
-    }
-
-    @Composable
-    fun GenreChip(genre: Genre, selected: Boolean, onGenreSelected: (Genre) -> Unit) {
-        Card(
-            modifier = Modifier
-                .padding(4.dp)
-                .clickable { onGenreSelected(genre) },
-            colors = CardDefaults.cardColors(
-                containerColor = if (selected) MaterialTheme.colorScheme.primary else Color.Gray
-            ),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp)
-            ) {
-                Text(
-                    text = genre.name,
-                    color = if (selected) Color.White else Color.Black,
-                    modifier = Modifier.padding(8.dp),
-                )
-            }
-        }
-    }
-
-
-    @Composable
-    fun MovieListContent(
+    fun MainScreen(
         mainUiState: MainUiState, onRefresh: () -> Unit, modifier: Modifier = Modifier
     ) {
         when (mainUiState) {
             is MainUiState.Success -> {
                 val movies = mainUiState.result.results.orEmpty()
-                MovieList(movies)
+                LazyColumn(modifier) {
+                    items(movies) { movie ->
+                        MovieListItem(movie)
+                    }
+                }
             }
 
             is MainUiState.Error -> {
@@ -200,7 +147,7 @@ class MainActivity : ComponentActivity() {
                     Image(
                         painter = painterResource(id = R.drawable.ic_error),
                         contentDescription = "Error Icon",
-                        modifier = Modifier.size(72.dp)
+                        modifier = Modifier.size(120.dp)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
@@ -211,10 +158,10 @@ class MainActivity : ComponentActivity() {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Add a refresh button
                     Button(
                         onClick = onRefresh, colors = ButtonDefaults.buttonColors(
-                            contentColor = Color.White
+                            contentColor = Color.White,
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer
                         ), shape = MaterialTheme.shapes.medium
                     ) {
                         Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
@@ -232,21 +179,13 @@ class MainActivity : ComponentActivity() {
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.secondaryContainer
                     )
                 }
             }
         }
     }
 
-    @Composable
-    fun MovieList(movies: List<Movie>, modifier: Modifier = Modifier) {
-        LazyColumn(modifier) {
-            items(movies) { movie ->
-                MovieListItem(movie)
-            }
-        }
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -256,7 +195,7 @@ class MainActivity : ComponentActivity() {
             .padding(8.dp),
             shape = RoundedCornerShape(0),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                containerColor = Color.DarkGray
             ),
             onClick = {
                 val intent = Intent(this, DetailActivity::class.java)
@@ -282,7 +221,7 @@ class MainActivity : ComponentActivity() {
                 // Movie Details
                 Column {
                     Text(
-                        text = movie.title,
+                        text = movie.title ?: "" ,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
@@ -290,12 +229,12 @@ class MainActivity : ComponentActivity() {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = movie.releaseDate,
+                        text = movie.releaseDate ?: "",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = movie.overview,
+                        text = movie.overview ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
